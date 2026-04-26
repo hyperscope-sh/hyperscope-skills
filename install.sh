@@ -8,7 +8,7 @@ Usage: install.sh <plugin> [api-key] [--global|--local]
 Installs a Hyperscope plugin into a Claude Code skills directory.
 
 Arguments:
-  plugin       Plugin name. Available: hyperliquid
+  plugin       Plugin name. Available: hyperscope
   api-key      (Optional) API key. If provided, written to .env (chmod 600).
                Without a key the skill works on the free tier.
 
@@ -43,11 +43,11 @@ if [ -z "$PLUGIN" ]; then
 fi
 
 case "$PLUGIN" in
-  hyperliquid)
+  hyperscope)
     SKILL="hyperliquid"
     ENV_KEY="HYPERSCOPE_API_KEY"
     ;;
-  *) echo "Unknown plugin: $PLUGIN" >&2; echo "Available: hyperliquid" >&2; exit 1 ;;
+  *) echo "Unknown plugin: $PLUGIN" >&2; echo "Available: hyperscope" >&2; exit 1 ;;
 esac
 
 # Pick install root

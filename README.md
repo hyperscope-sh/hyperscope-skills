@@ -4,9 +4,9 @@ Agent skills for the [Hyperscope](https://hyperscope.sh) APIs. Distributed as a 
 
 ## Available plugins
 
-| Plugin | Description |
-|--------|-------------|
-| [`hyperliquid`](./plugins/hyperliquid) | Query Hyperliquid blockchain data. Auto-routes between raw `/info` RPC (`info.hyperscope.sh`, 1 credit/call) and curated Data API analytics (`data.hyperscope.sh`, 2 credits/call). One skill, one key, two upstream APIs. |
+| Plugin | Skill | Description |
+|--------|-------|-------------|
+| [`hyperscope`](./plugins/hyperscope) | `hyperliquid` | Query Hyperliquid blockchain data. Auto-routes between raw `/info` RPC (`info.hyperscope.sh`, 1 credit/call) and curated Data API analytics (`data.hyperscope.sh`, 2 credits/call). One key, two backends. |
 
 ## API key (optional)
 
@@ -23,7 +23,7 @@ In Claude Code, run these **as two separate commands** (Claude Code only parses 
 ```
 
 ```
-/plugin install hyperliquid@hyperscope-skills
+/plugin install hyperscope@hyperscope-skills
 ```
 
 That's it — the skill is usable immediately on the free tier. To raise your limit, save a key to the location the skill checks:
@@ -41,11 +41,11 @@ For agents other than Claude Code, or for project-scoped install:
 ```bash
 # With a key (writes it to .env automatically)
 curl -fsSL https://raw.githubusercontent.com/hyperscope-sh/hyperscope-skills/main/install.sh \
-  | bash -s -- hyperliquid <YOUR_API_KEY>
+  | bash -s -- hyperscope <YOUR_API_KEY>
 
 # Without a key (free tier, 1000/day)
 curl -fsSL https://raw.githubusercontent.com/hyperscope-sh/hyperscope-skills/main/install.sh \
-  | bash -s -- hyperliquid
+  | bash -s -- hyperscope
 ```
 
 The skill installs into:
@@ -55,7 +55,7 @@ The skill installs into:
 Force one or the other with `--local` / `--global`:
 
 ```bash
-curl -fsSL .../install.sh | bash -s -- hyperliquid <KEY> --global
+curl -fsSL .../install.sh | bash -s -- hyperscope <KEY> --global
 ```
 
 When provided, the key is written to the skill's local `.env` **and** to `~/.hyperscope/.env` (both chmod 600), so the skill works the same regardless of how you installed it. Nothing leaves your machine. Rerun anytime to upgrade or rotate.
@@ -71,7 +71,7 @@ This repo is auto-synced from the [hyperscope monorepo](https://github.com/hyper
 ├── .claude-plugin/
 │   └── marketplace.json              # marketplace manifest
 ├── plugins/
-│   └── hyperliquid/
+│   └── hyperscope/
 │       ├── .claude-plugin/
 │       │   └── plugin.json           # plugin manifest
 │       └── skills/
