@@ -1,0 +1,6 @@
+{
+  "name": "data",
+  "description": "Query the Hyperscope Data API for Hyperliquid trader and market data.",
+  "version": "0.1.0",
+  "homepage": "https://hyperscope.sh"
+}

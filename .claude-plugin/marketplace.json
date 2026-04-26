@@ -1,0 +1,19 @@
+{
+  "name": "hyperscope-skills",
+  "owner": {
+    "name": "Hyperscope",
+    "url": "https://hyperscope.sh"
+  },
+  "metadata": {
+    "description": "Agent skills for Hyperliquid trader & market data, powered by Hyperscope.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "hyperliquid",
+      "source": "./plugins/hyperliquid",
+      "description": "Two skills: curated Hyperscope Data API + raw Hyperliquid public API, both via Hyperscope's authenticated proxy.",
+      "version": "0.1.0"
+    }
+  ]
+}
