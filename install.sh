@@ -69,27 +69,6 @@ fi
 REPO_RAW="https://raw.githubusercontent.com/hyperscope-sh/hyperscope-skills/main/plugins/${PLUGIN}/skills/${SKILL}"
 DEST="${SKILLS_DIR}/${SKILL}"
 
-# Migration: pre-0.2 layout shipped two skills (hyperliquid-data, hyperliquid-info).
-# They've been replaced by the single hyperliquid skill — clean them up so Claude Code
-# doesn't load three overlapping skill descriptions.
-LEGACY_DIRS=(
-  "${SKILLS_DIR}/hyperliquid-data"
-  "${SKILLS_DIR}/hyperliquid-info"
-)
-for legacy in "${LEGACY_DIRS[@]}"; do
-  if [ -d "$legacy" ]; then
-    # Preserve the key from any legacy .env into ~/.hyperscope/.env if not already set.
-    if [ -f "${legacy}/.env" ] && [ ! -s "${HOME}/.hyperscope/.env" ]; then
-      mkdir -p "${HOME}/.hyperscope"
-      cp "${legacy}/.env" "${HOME}/.hyperscope/.env"
-      chmod 600 "${HOME}/.hyperscope/.env"
-      echo "  · migrated key from ${legacy}/.env → ~/.hyperscope/.env"
-    fi
-    rm -rf "$legacy"
-    echo "  · removed legacy skill dir: ${legacy}"
-  fi
-done
-
 mkdir -p "$DEST"
 echo "Installing ${PLUGIN} (${SCOPE}) → ${DEST}"
 
