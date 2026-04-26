@@ -5,11 +5,12 @@ usage() {
   cat <<EOF
 Usage: install.sh <plugin> [api-key] [--global|--local]
 
-Installs a Hyperscope plugin (and all its skills) into a Claude Code skills directory.
+Installs a Hyperscope plugin into a Claude Code skills directory.
 
 Arguments:
   plugin       Plugin name. Available: hyperliquid
-  api-key      (Optional) API key. If provided, written to each skill's .env (chmod 600).
+  api-key      (Optional) API key. If provided, written to .env (chmod 600).
+               Without a key the skill works on the free tier.
 
 Flags:
   --local      Install to ./.claude/skills/  (default if inside a git repo)
@@ -43,7 +44,7 @@ fi
 
 case "$PLUGIN" in
   hyperliquid)
-    SKILLS=(data info)
+    SKILL="hyperliquid"
     ENV_KEY="HYPERSCOPE_API_KEY"
     ;;
   *) echo "Unknown plugin: $PLUGIN" >&2; echo "Available: hyperliquid" >&2; exit 1 ;;
@@ -65,32 +66,47 @@ else
   SKILLS_DIR="${HOME}/.claude/skills"
 fi
 
-REPO_RAW="https://raw.githubusercontent.com/hyperscope-sh/hyperscope-skills/main/plugins/${PLUGIN}/skills"
+REPO_RAW="https://raw.githubusercontent.com/hyperscope-sh/hyperscope-skills/main/plugins/${PLUGIN}/skills/${SKILL}"
+DEST="${SKILLS_DIR}/${SKILL}"
 
-echo "Installing ${PLUGIN} plugin (${SCOPE}) → ${SKILLS_DIR}"
-
-for SKILL in "${SKILLS[@]}"; do
-  DEST="${SKILLS_DIR}/${PLUGIN}-${SKILL}"
-  mkdir -p "$DEST"
-
-  echo "  · ${PLUGIN}-${SKILL}"
-  curl -fsSL "${REPO_RAW}/${SKILL}/SKILL.md"     -o "${DEST}/SKILL.md"
-  curl -fsSL "${REPO_RAW}/${SKILL}/.env.example" -o "${DEST}/.env.example"
-
-  if [ -n "$KEY" ]; then
-    printf '%s=%s\n' "$ENV_KEY" "$KEY" > "${DEST}/.env"
-    chmod 600 "${DEST}/.env"
-  elif [ ! -f "${DEST}/.env" ]; then
-    cp "${DEST}/.env.example" "${DEST}/.env"
+# Migration: pre-0.2 layout shipped two skills (hyperliquid-data, hyperliquid-info).
+# They've been replaced by the single hyperliquid skill — clean them up so Claude Code
+# doesn't load three overlapping skill descriptions.
+LEGACY_DIRS=(
+  "${SKILLS_DIR}/hyperliquid-data"
+  "${SKILLS_DIR}/hyperliquid-info"
+)
+for legacy in "${LEGACY_DIRS[@]}"; do
+  if [ -d "$legacy" ]; then
+    # Preserve the key from any legacy .env into ~/.hyperscope/.env if not already set.
+    if [ -f "${legacy}/.env" ] && [ ! -s "${HOME}/.hyperscope/.env" ]; then
+      mkdir -p "${HOME}/.hyperscope"
+      cp "${legacy}/.env" "${HOME}/.hyperscope/.env"
+      chmod 600 "${HOME}/.hyperscope/.env"
+      echo "  · migrated key from ${legacy}/.env → ~/.hyperscope/.env"
+    fi
+    rm -rf "$legacy"
+    echo "  · removed legacy skill dir: ${legacy}"
   fi
 done
 
+mkdir -p "$DEST"
+echo "Installing ${PLUGIN} (${SCOPE}) → ${DEST}"
+
+curl -fsSL "${REPO_RAW}/SKILL.md"     -o "${DEST}/SKILL.md"
+curl -fsSL "${REPO_RAW}/.env.example" -o "${DEST}/.env.example"
+
 if [ -n "$KEY" ]; then
+  printf '%s=%s\n' "$ENV_KEY" "$KEY" > "${DEST}/.env"
+  chmod 600 "${DEST}/.env"
   # Also persist to ~/.hyperscope/.env (single source of truth shared with marketplace installs).
   mkdir -p "${HOME}/.hyperscope"
   printf '%s=%s\n' "$ENV_KEY" "$KEY" > "${HOME}/.hyperscope/.env"
   chmod 600 "${HOME}/.hyperscope/.env"
-  echo "✓ Installed. Key written to ~/.hyperscope/.env and each skill's .env"
+  echo "✓ Installed. Key written to ~/.hyperscope/.env and ${DEST}/.env"
+elif [ ! -f "${DEST}/.env" ]; then
+  cp "${DEST}/.env.example" "${DEST}/.env"
+  echo "✓ Installed (free tier). To raise limits, set the key at ~/.hyperscope/.env (var: ${ENV_KEY})"
 else
-  echo "✓ Installed. Set the key at ~/.hyperscope/.env or each skill's .env (var: ${ENV_KEY})"
+  echo "✓ Installed. Existing .env preserved."
 fi

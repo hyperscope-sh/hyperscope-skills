@@ -12,7 +12,7 @@
     {
       "name": "hyperliquid",
       "source": "./plugins/hyperliquid",
-      "description": "Two skills: curated Hyperscope Data API + raw Hyperliquid public API, both via Hyperscope's authenticated proxy.",
+      "description": "Query and analyze Hyperliquid trader and market data via the Hyperscope APIs. Covers live state and historical analytics.",
       "version": "0.1.0"
     }
   ]
