@@ -1,4 +1,4 @@
-# Hyperscope Skills
+# Hyperscope Plugins
 
 Agent skills for the [Hyperscope](https://hyperscope.sh) APIs. Distributed as a Claude Code plugin marketplace, with a curl-based installer for any agent that reads `SKILL.md`.
 
@@ -6,7 +6,7 @@ Agent skills for the [Hyperscope](https://hyperscope.sh) APIs. Distributed as a 
 
 | Plugin | Skill | Description |
 |--------|-------|-------------|
-| [`hyperscope`](./plugins/hyperscope) | `hyperliquid` | Query Hyperliquid blockchain data. Auto-routes between raw `/info` RPC (`info.hyperscope.sh`, 1 credit/call) and curated Data API analytics (`data.hyperscope.sh`, 2 credits/call). One key, two backends. |
+| [`hyperscope`](./plugins/hyperscope) | `hyperliquid` | Query Hyperliquid blockchain data. Auto-routes between raw `/info` RPC and curated Data API analytics. |
 
 ## API key (optional)
 
@@ -19,11 +19,11 @@ The skill works either way — without a key it uses the free tier, with a key i
 In Claude Code, run these **as two separate commands** (Claude Code only parses one slash command per prompt — pasting both at once will fail):
 
 ```
-/plugin marketplace add hyperscope-sh/hyperscope-skills
+/plugin marketplace add hyperscope-sh/hyperscope-plugins
 ```
 
 ```
-/plugin install hyperscope@hyperscope-skills
+/plugin install hyperscope@hyperscope-plugins
 ```
 
 That's it — the skill is usable immediately on the free tier. To raise your limit, save a key to the location the skill checks:
@@ -40,11 +40,11 @@ For agents other than Claude Code, or for project-scoped install:
 
 ```bash
 # With a key (writes it to .env automatically)
-curl -fsSL https://raw.githubusercontent.com/hyperscope-sh/hyperscope-skills/main/install.sh \
+curl -fsSL https://raw.githubusercontent.com/hyperscope-sh/hyperscope-plugins/main/install.sh \
   | bash -s -- hyperscope <YOUR_API_KEY>
 
 # Without a key (free tier, 1000/day)
-curl -fsSL https://raw.githubusercontent.com/hyperscope-sh/hyperscope-skills/main/install.sh \
+curl -fsSL https://raw.githubusercontent.com/hyperscope-sh/hyperscope-plugins/main/install.sh \
   | bash -s -- hyperscope
 ```
 

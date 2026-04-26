@@ -66,7 +66,7 @@ else
   SKILLS_DIR="${HOME}/.claude/skills"
 fi
 
-REPO_RAW="https://raw.githubusercontent.com/hyperscope-sh/hyperscope-skills/main/plugins/${PLUGIN}/skills/${SKILL}"
+REPO_RAW="https://raw.githubusercontent.com/hyperscope-sh/hyperscope-plugins/main/plugins/${PLUGIN}/skills/${SKILL}"
 DEST="${SKILLS_DIR}/${SKILL}"
 
 mkdir -p "$DEST"

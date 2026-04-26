@@ -1,19 +1,19 @@
 {
-  "name": "hyperscope-skills",
+  "name": "hyperscope-plugins",
   "owner": {
     "name": "Hyperscope",
     "url": "https://hyperscope.sh"
   },
   "metadata": {
     "description": "Agent skills for Hyperliquid trader & market data, powered by Hyperscope.",
-    "version": "0.1.11"
+    "version": "0.1.12"
   },
   "plugins": [
     {
       "name": "hyperscope",
       "source": "./plugins/hyperscope",
       "description": "Query and analyze Hyperliquid trader and market data via the Hyperscope APIs. Covers live state and historical analytics.",
-      "version": "0.1.11"
+      "version": "0.1.12"
     }
   ]
 }
