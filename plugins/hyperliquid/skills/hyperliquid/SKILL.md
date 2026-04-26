@@ -8,14 +8,14 @@ description: Query and analyze Hyperliquid trader and market data via the Hypers
    - Environment variable `$HYPERSCOPE_API_KEY` if set in the shell.
    - File `~/.hyperscope/.env`, line `HYPERSCOPE_API_KEY=...` (persistent default for both marketplace and curl installs).
    - File `.env` next to this `SKILL.md` (per-project override, written by the curl installer).
-   - If none exist, **proceed without a key** — both APIs are open on a free tier (1000 requests/day). Mention to the user that they can get a free key at https://hyperscope.sh for higher limits.
+   - If none exist, **proceed without a key** — both APIs share a free tier of **1000 requests/day total** (combined across info + data). Mention to the user that they can get a free key at https://hyperscope.sh for higher limits.
 2. Auth: if a key is available, send it as `X-API-Key: <key>` on every request. Without a key, omit the header.
 
 ## Routing: which API to hit
 
-Two upstream APIs share one key. Pick per question:
+Two APIs share one key and one daily quota. Pick per question:
 
-### Use the **info** API (POST `/info` on `https://api.hyperscope.sh`) when:
+### Use the **info** API (POST `/info` on `https://info.hyperscope.sh`) when:
 - The question maps cleanly to a single Hyperliquid `/info` request type.
 - Live market state: orderbook, mid prices, candles, meta tables.
 - Single-account snapshot: balances, positions, open orders, recent fills, funding payments, ledger updates.
@@ -34,17 +34,17 @@ Try **info** first — it's cheaper and closer to raw HL. Only fall back to **da
 
 ## Info API
 
-Base URL: `https://api.hyperscope.sh`
-All public reads: POST `/info` with JSON body `{ "type": "...", ...params }` — the request format mirrors Hyperliquid's native `/info` RPC.
+Base URL: `https://info.hyperscope.sh`
+All public reads: POST `/info` with JSON body `{ "type": "...", ...params }` — body shape follows Hyperliquid's `/info` RPC schema.
 
 ### Discovering request types
-Hyperliquid's `/info` is RPC-style with ~30 request types. The TypeScript interfaces in [nktkas/hyperliquid](https://github.com/nktkas/hyperliquid) are the source of truth. **Don't fetch them eagerly** — only when a request type isn't on the cheat sheet below:
+Hyperliquid's `/info` is RPC-style with ~80 request types. The TypeScript schemas in [nktkas/hyperliquid](https://github.com/nktkas/hyperliquid) are the source of truth — **one file per method** under `src/api/info/_methods/`. **Don't fetch eagerly** — only when a request type isn't on the cheat sheet below, fetch the matching method file:
 
 ```
-https://raw.githubusercontent.com/nktkas/hyperliquid/main/src/types/info/requests.d.ts
-https://raw.githubusercontent.com/nktkas/hyperliquid/main/src/types/info/responses.d.ts
+https://raw.githubusercontent.com/nktkas/hyperliquid/main/src/api/info/_methods/<methodName>.ts
 ```
-Cache for the session.
+
+Each file exports `<MethodName>Request` (valibot schema for the body) and `<MethodName>Response` (TS type). Example: `clearinghouseState` → `src/api/info/_methods/clearinghouseState.ts`. Browse the directory listing if you don't know the method name: https://github.com/nktkas/hyperliquid/tree/main/src/api/info/_methods. Cache fetched files for the session.
 
 ### Common requests (cheat sheet)
 
@@ -67,7 +67,7 @@ Cache for the session.
 ### Example: BTC orderbook + 1-minute candles for the last hour
 ```bash
 KEY="$HYPERSCOPE_API_KEY"
-URL="https://api.hyperscope.sh/info"
+URL="https://info.hyperscope.sh/info"
 
 # Top of book
 curl -s -X POST "$URL" \
@@ -89,21 +89,41 @@ curl -s -X POST "$URL" \
 ## Data API
 
 Base URL: `https://data.hyperscope.sh`
+OpenAPI spec: `https://hyperscope.sh/arx-data.json`
 
-### Discovering endpoints
-The Data API is REST with an OpenAPI schema. **Don't fetch it eagerly** — fetch the first time you decide a query needs this API:
+### Use `api-introspect` to discover and call endpoints
 
+The Data API publishes an OpenAPI spec. Use the [`api-introspect`](https://github.com/callmewhy/api-introspect) CLI instead of fetching/parsing the schema by hand — it auto-detects the spec, lists endpoints, and routes inputs to the right path/query/body locations when calling.
+
+**Discover endpoints (run once per session):**
+```bash
+npx -y api-introspect list https://hyperscope.sh/arx-data.json
 ```
-https://hyperscope.sh/arx-data.json
+
+**Inspect one endpoint's full schema:**
+```bash
+npx -y api-introspect info https://hyperscope.sh/arx-data.json \
+  --path /v1/traders/{user}/daily --method GET
 ```
 
-Cache the parsed schema for the rest of the session. Pick the operation that answers the question, build the URL as `BASE_URL + path`, attach required query params, send with `X-API-Key` if you have a key.
+**Call an endpoint:**
+```bash
+npx -y api-introspect call https://hyperscope.sh/arx-data.json \
+  --base-url https://data.hyperscope.sh \
+  --path /v1/traders/{user}/daily --method GET \
+  --input '{"user":"0xabc...","start_date":"2025-01-01","end_date":"2026-04-24","limit":1000}' \
+  -H "X-API-Key:$HYPERSCOPE_API_KEY"
+```
+
+`--base-url` is required for `call`: the spec lives on the docs host but the API serves at `data.hyperscope.sh`. `list` and `info` don't need it (they only read the spec). Omit `-H` on the free tier. Pass `--input` as a flat JSON object — the CLI splits fields between path / query / body based on the spec. Cache the `list` output for the session.
 
 ### Example: trader 30-day PnL history
 ```bash
-curl -s -H "X-API-Key: $HYPERSCOPE_API_KEY" \
-  "https://data.hyperscope.sh/v1/traders/0xabc.../daily?start_date=2025-01-01&end_date=2026-04-24&limit=1000" \
-  | jq '[.data[] | {date: .trade_date, net_pnl: (.net_pnl // "0" | tonumber)}] | sort_by(.date)'
+npx -y api-introspect call https://hyperscope.sh/arx-data.json \
+  --base-url https://data.hyperscope.sh \
+  --path /v1/traders/{user}/daily --method GET \
+  --input '{"user":"0xabc...","start_date":"2026-03-27","end_date":"2026-04-26","limit":1000}' \
+  ${HYPERSCOPE_API_KEY:+-H "X-API-Key:$HYPERSCOPE_API_KEY"}
 ```
 
 ---
@@ -130,4 +150,4 @@ Behavior:
 ## Notes
 
 - This skill is **read-only**. For order placement / signing, use Hyperliquid's official trading SDKs directly with your wallet — Hyperscope does not custody or sign.
-- WebSocket streaming (`api.hyperscope.sh/ws`) exists but is out of scope for this skill; use the official `nktkas/hyperliquid` client if you need subscriptions.
+- WebSocket streaming (`info.hyperscope.sh/ws`) exists but is out of scope for this skill; use the official `nktkas/hyperliquid` client if you need subscriptions.

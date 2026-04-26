@@ -6,11 +6,11 @@ Agent skills for the [Hyperscope](https://hyperscope.sh) APIs. Distributed as a 
 
 | Plugin | Description |
 |--------|-------------|
-| [`hyperliquid`](./plugins/hyperliquid) | Query Hyperliquid blockchain data. Auto-routes between raw `/info` RPC (`api.hyperscope.sh`, 1 credit/call) and curated Data API analytics (`data.hyperscope.sh`, 2 credits/call). One skill, one key, two upstream APIs. |
+| [`hyperliquid`](./plugins/hyperliquid) | Query Hyperliquid blockchain data. Auto-routes between raw `/info` RPC (`info.hyperscope.sh`, 1 credit/call) and curated Data API analytics (`data.hyperscope.sh`, 2 credits/call). One skill, one key, two upstream APIs. |
 
 ## API key (optional)
 
-The Hyperscope APIs have a free tier of **1000 requests/day** that works without any key (applies to both `data.hyperscope.sh` and `api.hyperscope.sh`). For higher limits, create a project at [hyperscope.sh](https://hyperscope.sh) → Dashboard → your project → **Agent** tab.
+The Hyperscope APIs have a free tier of **1000 requests/day** that works without any key (applies to both `data.hyperscope.sh` and `info.hyperscope.sh`). For higher limits, create a project at [hyperscope.sh](https://hyperscope.sh) → Dashboard → your project → **Agent** tab.
 
 The skill works either way — without a key it uses the free tier, with a key it switches to authenticated (credit-metered) mode.
 
