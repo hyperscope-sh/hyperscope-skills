@@ -132,7 +132,7 @@ npx -y api-introspect call https://hyperscope.sh/arx-data.json \
 
 - **Addresses**: lowercase every `0x...` address before sending. Mixed-case may 404 or return empty.
 - **Time**:
-  - Info API: Hyperliquid uses Unix **milliseconds** (not seconds). On macOS: `$(($(date +%s) * 1000))` or `gdate +%s%3N`.
+  - Info API: Hyperliquid uses Unix **milliseconds** (not seconds). Portable form: `$(($(date +%s) * 1000))` — works on Linux, macOS, and other POSIX shells.
   - Data API: ISO date strings (`YYYY-MM-DD`) for `start_date`/`end_date`; defaults are usually fine.
 - **Numbers**: prices, sizes, money fields are stringified decimals; parse late to preserve precision. Money fields (`net_pnl`, `account_value`, `total_notional`, ...) can be `null` — coerce with 0 before aggregating. Hyperliquid perps values are USD-denominated.
 - **Coin names**: perps use bare ticker (`BTC`, `ETH`); spot pairs use `@<index>` notation (look up via `spotMeta`).

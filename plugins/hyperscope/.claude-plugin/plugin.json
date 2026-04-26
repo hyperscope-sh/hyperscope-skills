@@ -1,6 +1,6 @@
 {
   "name": "hyperscope",
   "description": "Query and analyze Hyperliquid trader and market data via the Hyperscope APIs. Covers live state and historical analytics.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "homepage": "https://github.com/hyperscope-sh/hyperscope-plugins"
 }
