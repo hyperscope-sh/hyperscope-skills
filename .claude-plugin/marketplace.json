@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "Agent skills for Hyperliquid trader & market data, powered by Hyperscope.",
-    "version": "0.1.2"
+    "version": "0.1.3"
   },
   "plugins": [
     {
       "name": "hyperscope",
       "source": "./plugins/hyperscope",
       "description": "Query and analyze Hyperliquid trader and market data via the Hyperscope APIs. Covers live state and historical analytics.",
-      "version": "0.1.2"
+      "version": "0.1.3"
     }
   ]
 }

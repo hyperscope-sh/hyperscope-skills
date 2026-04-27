@@ -21,14 +21,14 @@ Two APIs share one key and one daily quota. Pick per question:
 - Single-account snapshot: balances, positions, open orders, recent fills, funding payments, ledger updates.
 - Cost (authenticated): 1 credit/call.
 
-### Use the **data** API (GET `/v1/*` on `https://data.hyperscope.sh`) when:
+### Use the **data** API (`https://data.hyperscope.sh`) when:
 - Answer needs aggregation, ranking, or time-series with sensible defaults.
-- Cross-trader queries: top by PnL, smart-money rankings, leaderboards.
-- Pre-joined analytics that aren't a single `/info` call: cumulative PnL, ROI, win-rate, daily/weekly series.
+- Cross-trader queries: top by PnL, win-rate, daily/weekly series.
+- Pre-joined analytics that aren't a single `/info` call: cumulative PnL, ROI, daily/weekly time-series.
 - Cost (authenticated): 2 credits/call.
 
 ### When in doubt
-Try **info** first — it's cheaper and closer to raw HL. Only fall back to **data** if info doesn't expose the right shape.
+Match the API to the shape of the question, not the price. If the answer is a raw HL state read (one market, one account, one `/info` request type), use **info**. If the answer requires aggregation, ranking, time-series, or cross-trader joins, use **data**.
 
 ---
 
@@ -89,26 +89,28 @@ curl -s -X POST "$URL" \
 ## Data API
 
 Base URL: `https://data.hyperscope.sh`
-OpenAPI spec: `https://hyperscope.sh/arx-data.json`
+OpenAPI spec: `https://data.hyperscope.sh/openapi.json`
+
+The spec lists the proxied ARX warehouse endpoints. Use `api-introspect list` to discover everything callable on `data.hyperscope.sh`.
 
 ### Use `api-introspect` to discover and call endpoints
 
-The Data API publishes an OpenAPI spec. Use the [`api-introspect`](https://github.com/callmewhy/api-introspect) CLI instead of fetching/parsing the schema by hand — it auto-detects the spec, lists endpoints, and routes inputs to the right path/query/body locations when calling.
+Use the [`api-introspect`](https://github.com/callmewhy/api-introspect) CLI instead of fetching/parsing the schema by hand — it auto-detects the spec, lists endpoints, and routes inputs to the right path/query/body locations when calling.
 
 **Discover endpoints (run once per session):**
 ```bash
-npx -y api-introspect list https://hyperscope.sh/arx-data.json
+npx -y api-introspect list https://data.hyperscope.sh/openapi.json
 ```
 
 **Inspect one endpoint's full schema:**
 ```bash
-npx -y api-introspect info https://hyperscope.sh/arx-data.json \
+npx -y api-introspect info https://data.hyperscope.sh/openapi.json \
   --path /v1/traders/{user}/daily --method GET
 ```
 
 **Call an endpoint:**
 ```bash
-npx -y api-introspect call https://hyperscope.sh/arx-data.json \
+npx -y api-introspect call https://data.hyperscope.sh/openapi.json \
   --base-url https://data.hyperscope.sh \
   --path /v1/traders/{user}/daily --method GET \
   --input '{"user":"0xabc...","start_date":"2025-01-01","end_date":"2026-04-24","limit":1000}' \
@@ -119,7 +121,7 @@ npx -y api-introspect call https://hyperscope.sh/arx-data.json \
 
 ### Example: trader 30-day PnL history
 ```bash
-npx -y api-introspect call https://hyperscope.sh/arx-data.json \
+npx -y api-introspect call https://data.hyperscope.sh/openapi.json \
   --base-url https://data.hyperscope.sh \
   --path /v1/traders/{user}/daily --method GET \
   --input '{"user":"0xabc...","start_date":"2026-03-27","end_date":"2026-04-26","limit":1000}' \
