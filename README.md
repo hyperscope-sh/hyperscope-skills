@@ -34,9 +34,23 @@ mkdir -p ~/.hyperscope && echo 'HYPERSCOPE_API_KEY=hs_...' > ~/.hyperscope/.env 
 
 The skill checks `$HYPERSCOPE_API_KEY` first, then `~/.hyperscope/.env`. If you prefer a shell env var, append `export HYPERSCOPE_API_KEY=hs_...` to `~/.zshrc` or `~/.bashrc` instead.
 
+## Install (npx skills, any agent)
+
+For a one-line install across Claude Code, Cursor, Codex CLI, Gemini CLI, and other agents that read `SKILL.md`:
+
+```bash
+npx skills add hyperscope-sh/hyperscope-plugins
+```
+
+This auto-detects your harness and writes the skill to the right location (e.g. `.claude/skills/hyperliquid/`). To raise your daily limit, save a key to the location the skill checks:
+
+```bash
+mkdir -p ~/.hyperscope && echo 'HYPERSCOPE_API_KEY=hs_...' > ~/.hyperscope/.env && chmod 600 ~/.hyperscope/.env
+```
+
 ## Install (curl, any agent)
 
-For agents other than Claude Code, or for project-scoped install:
+For project-scoped install or to write the API key in one shot:
 
 ```bash
 # With a key (writes it to .env automatically)
