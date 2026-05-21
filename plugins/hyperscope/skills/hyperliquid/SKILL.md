@@ -53,7 +53,7 @@ Each file exports `<MethodName>Request` (valibot schema for the body) and `<Meth
 | `meta` | `{"type":"meta"}` | universe (all perp coins) + margin tables |
 | `spotMeta` | `{"type":"spotMeta"}` | spot universe + token metadata |
 | `allMids` | `{"type":"allMids"}` | mid prices for every coin |
-| `l2Book` | `{"type":"l2Book","coin":"BTC"}` | level-2 orderbook (top N levels per side) |
+| `l2Book` | `{"type":"l2Book","coin":"BTC"}` | level-2 orderbook (`levels[0]` = bids, `levels[1]` = asks, descending then ascending) |
 | `candleSnapshot` | `{"type":"candleSnapshot","req":{"coin":"BTC","interval":"1m","startTime":<ms>,"endTime":<ms>}}` | OHLCV candles |
 | `clearinghouseState` | `{"type":"clearinghouseState","user":"0x..."}` | perps account state (positions, margin, value) |
 | `spotClearinghouseState` | `{"type":"spotClearinghouseState","user":"0x..."}` | spot account balances |
@@ -117,14 +117,15 @@ npx -y api-introspect call https://data.hyperscope.sh/openapi.json \
   -H "X-API-Key:$HYPERSCOPE_API_KEY"
 ```
 
-`--base-url` is required for `call`: the spec lives on the docs host but the API serves at `data.hyperscope.sh`. `list` and `info` don't need it (they only read the spec). Omit `-H` on the free tier. Pass `--input` as a flat JSON object — the CLI splits fields between path / query / body based on the spec. Cache the `list` output for the session.
+`--base-url` is required for `call`: the spec lives on the docs host but the API serves at `data.hyperscope.sh`. `list` and `info` don't need it (they only read the spec). Omit `-H` on the free tier. Pass `--input` as a flat JSON object — the CLI splits fields between path / query / body based on the spec. If you pass a name the spec doesn't recognize, the CLI lists the known fields in the error message; use that list to fix the call. Cache the `list` output for the session.
 
-### Example: trader 30-day PnL history
+### Example: trader PnL history
 ```bash
+# Defaults give a sensible window
 npx -y api-introspect call https://data.hyperscope.sh/openapi.json \
   --base-url https://data.hyperscope.sh \
   --path /v1/traders/{user}/daily --method GET \
-  --input '{"user":"0xabc...","start_date":"2026-03-27","end_date":"2026-04-26","limit":1000}' \
+  --input '{"user":"0xabc..."}' \
   ${HYPERSCOPE_API_KEY:+-H "X-API-Key:$HYPERSCOPE_API_KEY"}
 ```
 
